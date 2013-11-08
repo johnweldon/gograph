@@ -1,0 +1,11 @@
+
+digraph default {
+    A -> B [label=5];
+    B -> C [label=4];
+    C -> D [label=8];
+    D -> E [label=6];
+    A -> D [label=5];
+    C -> E [label=2];
+    E -> B [label=3];
+    A -> E [label=7];
+}
