@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -28,6 +29,38 @@ type Path struct {
 	Edges []Edge
 }
 
+func (p *Path) Pop() (ok bool, e Edge) {
+	ok = false
+	if len(p.Edges) == 0 {
+		return
+	}
+	e, p.Edges = p.Edges[len(p.Edges)-1], p.Edges[:len(p.Edges)-1]
+	ok = true
+	return
+}
+
+func (p *Path) Push(e Edge) {
+	p.Edges = append(p.Edges, e)
+}
+
+func (p *Path) Weight() float64 {
+	var f float64
+	f = 0
+	for _, e := range p.Edges {
+		f = f + e.Weight
+	}
+	return f
+}
+
+func (e *Edge) String() string { return fmt.Sprintf("%s%s%g", e.Head.Name, e.Tail.Name, e.Weight) }
+func (p *Path) String() string {
+	ret := "["
+	for _, e := range p.Edges {
+		ret = fmt.Sprintf("%s, %s", ret, &e)
+	}
+	return ret + "]"
+}
+
 func (g *Graph) Order() int { return len(g.vertices) }
 func (g *Graph) Size() int  { return len(g.edges) }
 
@@ -37,6 +70,7 @@ func (g *Graph) FindAllPaths(from, to string) (ok bool, paths []Path) {
 }
 
 func (g *Graph) FindShortestPath(from, to string) (ok bool, path Path) {
+	ok = false
 	path = Path{}
 
 	//
@@ -61,28 +95,54 @@ func (g *Graph) FindShortestPath(from, to string) (ok bool, path Path) {
 	// begin loop
 	for {
 		// consider all neighbors and calculate tentative distance
-		for _, e := range g.edges {
-			if e.Head != cur {
+		me := cur.Name
+		neighbors := g.getNeighbors(cur)
+		smallest := me
+		smallestweight := math.MaxFloat64
+		for neighbor, weight := range neighbors {
+			neighborname := neighbor.Name
+			neighborweight := distances[me] + weight
+			if neighborweight < smallestweight {
+				smallest, smallestweight = neighborname, neighborweight
+			}
+			if visited[neighborname] {
 				continue
 			}
-			me, neighbor := cur.Name, e.Tail.Name
-			relaxed := distances[me] + e.Weight
-			if visited[neighbor] {
-				continue
-			}
-			if distances[neighbor] == math.SmallestNonzeroFloat64 {
-				distances[neighbor] = relaxed
-			} else if distances[neighbor] > relaxed {
-				distances[neighbor] = relaxed
+			if distances[neighborname] == math.SmallestNonzeroFloat64 {
+				distances[neighborname] = neighborweight
+				path.Push(Edge{Head: cur, Tail: neighbor, Weight: weight, Data: nil})
+			} else if distances[neighborname] > neighborweight {
+				distances[neighborname] = neighborweight
+				path.Pop()
+				path.Push(Edge{Head: cur, Tail: neighbor, Weight: weight, Data: nil})
 			}
 		}
 		// mark current visited and remove from unvisited set
 		visited[cur.Name] = true
 		// if current = to done
+		if cur.Name == to {
+			ok = true
+			return
+		}
 		// mark current = smallest neighbor; goto loop
+		if ok, cur = g.FindVertice(smallest); !ok {
+			return
+		}
+
 	}
 
 	return
+}
+
+func (g *Graph) getNeighbors(v *Vertice) map[*Vertice]float64 {
+	neighbors := map[*Vertice]float64{}
+	for _, e := range g.edges {
+		if e.Head != v {
+			continue
+		}
+		neighbors[e.Tail] = e.Weight
+	}
+	return neighbors
 }
 
 func (g *Graph) AddVertice(name string, data interface{}) (bool, *Vertice) {

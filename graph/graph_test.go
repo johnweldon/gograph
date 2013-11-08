@@ -61,4 +61,21 @@ func TestFindAllPaths(t *testing.T) {
 		t.Errorf("Not enough paths")
 	}
 }
-func TestFindShortestPath(t *testing.T) { t.Errorf("Not-implemented") }
+func TestFindShortestPath(t *testing.T) {
+	//Graph: AB5, BC4, CD8, DC8, DE6, AD5, CE2, EB3, AE7
+	g := graph.Graph{}
+	g.AddEdge("A", "B", 5, nil)
+	g.AddEdge("B", "C", 4, nil)
+	g.AddEdge("C", "D", 8, nil)
+	g.AddEdge("D", "C", 8, nil)
+	g.AddEdge("D", "E", 6, nil)
+	g.AddEdge("A", "D", 5, nil)
+	g.AddEdge("C", "E", 2, nil)
+	g.AddEdge("E", "B", 3, nil)
+	g.AddEdge("A", "E", 7, nil)
+	if ok, path := g.FindShortestPath("A", "C"); !ok {
+		t.Fatalf("Failed to find shortest path")
+	} else if path.Weight() != float64(9) {
+		t.Fatalf("Expected distance %g, got %g \n path: %s", float64(9), path.Weight(), &path)
+	}
+}
