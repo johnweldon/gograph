@@ -18,16 +18,14 @@ func (g *Graph) FindAllPaths(from, to string) (ok bool, paths []Path) {
 	return
 }
 
-func (g *Graph) FindShortestPath(from, to string) (ok bool, path Path) {
+func (g *Graph) FindShortestPath(from, to string, max int) (ok bool, path Path) {
 	ok = false
 	path = Path{}
 
 	//
 	// Dijkstra
 	//
-	var cur *Vertice
 
-	// initialize distance, visited, current node
 	distances := map[string]float64{}
 	visited := map[string]bool{}
 	for _, v := range g.vertices {
@@ -36,48 +34,57 @@ func (g *Graph) FindShortestPath(from, to string) (ok bool, path Path) {
 	}
 	distances[from] = 0
 
-	// set current = from
+	var cur, closest *Vertice
 	if ok, cur = g.FindVertice(from); !ok {
 		return
 	}
 
-	// begin loop
 	for {
-		// consider all neighbors and calculate tentative distance
 		me := cur.Name
 		neighbors := g.getNeighbors(cur)
-		smallest := me
+
+		smallest := ""
 		smallestweight := math.MaxFloat64
+
 		for neighbor, weight := range neighbors {
-			neighborname := neighbor.Name
-			neighborweight := distances[me] + weight
-			if neighborweight < smallestweight {
-				smallest, smallestweight = neighborname, neighborweight
-			}
-			if visited[neighborname] {
+			nname := neighbor.Name
+			nweight := distances[me] + weight
+			if visited[nname] {
 				continue
 			}
-			if distances[neighborname] == math.SmallestNonzeroFloat64 {
-				distances[neighborname] = neighborweight
-				path.Push(Edge{Head: cur, Tail: neighbor, Weight: weight, Data: nil})
-			} else if distances[neighborname] > neighborweight {
-				distances[neighborname] = neighborweight
-				path.Pop()
-				path.Push(Edge{Head: cur, Tail: neighbor, Weight: weight, Data: nil})
+
+			if nweight < smallestweight {
+				smallest, smallestweight = nname, nweight
+			}
+
+			if distances[nname] == math.SmallestNonzeroFloat64 {
+				distances[nname] = nweight
+			} else if distances[nname] > nweight {
+				distances[nname] = nweight
 			}
 		}
+
 		// mark current visited and remove from unvisited set
 		visited[cur.Name] = true
 		// if current = to done
-		if cur.Name == to {
+		if cur.Name == to && len(path.Edges) > 0 {
 			ok = true
 			return
 		}
+
 		// mark current = smallest neighbor; goto loop
-		if ok, cur = g.FindVertice(smallest); !ok {
+		if ok, closest = g.FindVertice(smallest); !ok {
 			return
 		}
+		path.Push(Edge{Head: cur, Tail: closest, Weight: smallestweight - distances[cur.Name], Data: nil})
 
+		cur = closest
+
+		// short circuit
+		if max > 0 && len(path.Edges) >= max {
+			ok = false
+			return
+		}
 	}
 
 	return

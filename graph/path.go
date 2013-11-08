@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"fmt"
+	"strings"
 )
 
 type Path struct {
@@ -31,10 +31,10 @@ func (p *Path) Weight() float64 {
 	return f
 }
 
-func (p *Path) String() string {
-	ret := "["
+func (p Path) String() string {
+	s := []string{}
 	for _, e := range p.Edges {
-		ret = fmt.Sprintf("%s, %s", ret, &e)
+		s = append(s, e.String())
 	}
-	return ret + "]"
+	return "[" + strings.Join(s, ", ") + "]"
 }
