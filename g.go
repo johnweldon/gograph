@@ -1,10 +1,10 @@
 package main
 
 import (
-	"./graph"
+	"github.com/johnweldon/gograph/graph"
 )
 
 func main() {
 	g := graph.Graph{}
-	g.AddVertice(nil)
+    g.AddVertice("A", nil)
 }
