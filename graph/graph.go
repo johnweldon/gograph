@@ -1,64 +1,13 @@
 package graph
 
 import (
-	"fmt"
 	"math"
 )
-
-type Vertice struct {
-	Name      string
-	Data      interface{}
-	indegree  []*Vertice
-	outdegree []*Vertice
-}
-
-type Edge struct {
-	Head   *Vertice
-	Tail   *Vertice
-	Weight float64
-	Data   interface{}
-}
 
 type Graph struct {
 	Directed bool
 	vertices []*Vertice
 	edges    []Edge
-}
-
-type Path struct {
-	Edges []Edge
-}
-
-func (p *Path) Pop() (ok bool, e Edge) {
-	ok = false
-	if len(p.Edges) == 0 {
-		return
-	}
-	e, p.Edges = p.Edges[len(p.Edges)-1], p.Edges[:len(p.Edges)-1]
-	ok = true
-	return
-}
-
-func (p *Path) Push(e Edge) {
-	p.Edges = append(p.Edges, e)
-}
-
-func (p *Path) Weight() float64 {
-	var f float64
-	f = 0
-	for _, e := range p.Edges {
-		f = f + e.Weight
-	}
-	return f
-}
-
-func (e *Edge) String() string { return fmt.Sprintf("%s%s%g", e.Head.Name, e.Tail.Name, e.Weight) }
-func (p *Path) String() string {
-	ret := "["
-	for _, e := range p.Edges {
-		ret = fmt.Sprintf("%s, %s", ret, &e)
-	}
-	return ret + "]"
 }
 
 func (g *Graph) Order() int { return len(g.vertices) }
@@ -134,17 +83,6 @@ func (g *Graph) FindShortestPath(from, to string) (ok bool, path Path) {
 	return
 }
 
-func (g *Graph) getNeighbors(v *Vertice) map[*Vertice]float64 {
-	neighbors := map[*Vertice]float64{}
-	for _, e := range g.edges {
-		if e.Head != v {
-			continue
-		}
-		neighbors[e.Tail] = e.Weight
-	}
-	return neighbors
-}
-
 func (g *Graph) AddVertice(name string, data interface{}) (bool, *Vertice) {
 	if ok, existing := g.FindVertice(name); ok {
 		return false, existing
@@ -178,11 +116,13 @@ func (g *Graph) FindVertice(name string) (bool, *Vertice) {
 	return findVertice(name, g.vertices)
 }
 
-func findVertice(name string, vertices []*Vertice) (bool, *Vertice) {
-	for _, v := range vertices {
-		if v.Name == name {
-			return true, v
+func (g *Graph) getNeighbors(v *Vertice) map[*Vertice]float64 {
+	neighbors := map[*Vertice]float64{}
+	for _, e := range g.edges {
+		if e.Head != v {
+			continue
 		}
+		neighbors[e.Tail] = e.Weight
 	}
-	return false, nil
+	return neighbors
 }
