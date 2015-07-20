@@ -6,5 +6,5 @@ import (
 
 func main() {
 	g := graph.Graph{}
-    g.AddVertice("A", nil)
+	g.AddVertice("A", nil)
 }

@@ -86,8 +86,6 @@ func (g *Graph) FindShortestPath(from, to string, max int) (ok bool, path Path) 
 			return
 		}
 	}
-
-	return
 }
 
 func (g *Graph) AddVertice(name string, data interface{}) (bool, *Vertice) {

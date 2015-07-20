@@ -100,16 +100,16 @@ func defaultGraph() *graph.Graph {
 	//Graph: AB5, BC4, CD8, DC8, DE6, AD5, CE2, EB3, AE7
 	/*
 
-	digraph default {
-	    A -> B [label=5];
-	    B -> C [label=4];
-	    C -> D [label=8];
-	    D -> E [label=6];
-	    A -> D [label=5];
-	    C -> E [label=2];
-	    E -> B [label=3];
-	    A -> E [label=7];
-    }
+			digraph default {
+			    A -> B [label=5];
+			    B -> C [label=4];
+			    C -> D [label=8];
+			    D -> E [label=6];
+			    A -> D [label=5];
+			    C -> E [label=2];
+			    E -> B [label=3];
+			    A -> E [label=7];
+		    }
 
 	*/
 	g := graph.Graph{}
